@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stunnel-config
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "mailhog.labels" . | nindent 4 }}
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  stunnel.conf: |
+    debug = 7
+    foreground = yes
+    [smtp]
+    protocol = smtp
+    client = no
+    accept = 0.0.0.0:{{ .Values.containerPort.smtps.port }}
+    connect = 127.0.0.1:{{ .Values.containerPort.smtp.port }}
+    cert = /etc/stunnel/certs/tls.crt
+    key = /etc/stunnel/certs/tls.key
+    protocolUsername = test
+    protocolPassword = test
+
+  # ciphers = PSK
+  # PSKsecrets = /authdir/auth.txt
